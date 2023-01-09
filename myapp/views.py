@@ -8,7 +8,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 # Create your views here.myapp
-
+from django.http import Http404
+from rest_framework.views import APIView
 
 #-------------------serializer-------------
 # @csrf_exempt
@@ -60,15 +61,60 @@ from rest_framework.response import Response
 
 
 # ---------------------request and response-------------------
-@api_view(['GET', 'POST'])
-def api_list(request):
+# @api_view(['GET', 'POST'])
+# def api_list(request):
    
-    if request.method == 'GET':
-        api_data = Contact.objects.all()
-        serializer = ContactSerializer(api_data, many=True)
+#     if request.method == 'GET':
+#         api_data = Contact.objects.all()
+#         serializer = ContactSerializer(api_data, many=True)
+#         return Response(serializer.data)
+
+#     elif request.method == 'POST':
+#         serializer = ContactSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+      
+      
+      
+# @api_view(['GET', 'PUT', 'DELETE'])
+# def api_detail(request, pk):
+   
+#     try:
+#         data_details = Contact.objects.get(pk=pk)
+#     except Contact.DoesNotExist:
+#         return Response(status=status.HTTP_404_NOT_FOUND)
+
+#     if request.method == 'GET':
+#         serializer = ContactSerializer(data_details)
+#         return Response(serializer.data)
+
+#     elif request.method == 'PUT':
+#         serializer = ContactSerializer(data_details, data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#     elif request.method == 'DELETE':
+#         data_details.delete()
+#         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+
+
+# ----------------------Class base view------------------------------
+
+class BlogList(APIView):
+    
+    def get(self, request, format=None):
+        data_list = Contact.objects.all()
+        serializer = ContactSerializer(data_list, many=True)
         return Response(serializer.data)
 
-    elif request.method == 'POST':
+    def post(self, request, format=None):
         serializer = ContactSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -76,26 +122,28 @@ def api_list(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
       
       
-      
-@api_view(['GET', 'PUT', 'DELETE'])
-def api_detail(request, pk):
-   
-    try:
-        data_details = Contact.objects.get(pk=pk)
-    except Contact.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+class ApiDetail(APIView):
+  
+    def get_object(self, pk):
+        try:
+            return Contact.objects.get(pk=pk)
+        except Contact.DoesNotExist:
+            raise Http404
 
-    if request.method == 'GET':
-        serializer = ContactSerializer(data_details)
+    def get(self, request, pk, format=None):
+        data_list = self.get_object(pk)
+        serializer = ContactSerializer(data_list)
         return Response(serializer.data)
 
-    elif request.method == 'PUT':
-        serializer = ContactSerializer(data_details, data=request.data)
+    def put(self, request, pk, format=None):
+        data_list = self.get_object(pk)
+        serializer = ContactSerializer(data_list, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    elif request.method == 'DELETE':
-        data_details.delete()
+    def delete(self, request, pk, format=None):
+        data_list = self.get_object(pk)
+        data_list.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
