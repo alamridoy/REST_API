@@ -147,3 +147,42 @@ class ApiDetail(APIView):
         data_list = self.get_object(pk)
         data_list.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+      
+      
+      
+      
+#------------------ganeric and mixins---------------------#
+from rest_framework import mixins
+from rest_framework import generics
+
+class ContactList(generics.ListCreateAPIView,mixins.ListModelMixin,
+                  mixins.CreateModelMixin,
+                  generics.GenericAPIView):
+    queryset =Contact.objects.all()
+    serializer_class = ContactSerializer
+    
+    
+    def get(self, request):
+        return self.list(request)
+
+    def post(self, request):
+        return self.create(request) 
+      
+      
+      
+class ContactDetail(generics.RetrieveUpdateDestroyAPIView,mixins.RetrieveModelMixin,
+                    mixins.UpdateModelMixin,
+                    mixins.DestroyModelMixin,
+                    generics.GenericAPIView):
+    queryset = Contact.objects.all()
+    serializer_class =ContactSerializer
+    
+    
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
